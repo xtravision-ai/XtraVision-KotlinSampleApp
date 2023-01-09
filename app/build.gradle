@@ -64,7 +64,7 @@ dependencies {
     implementation "androidx.camera:camera-extensions:1.1.0-beta01"
 
     // required google ml-kit and required utilities
-    implementation 'com.google.mlkit:pose-detection:17.0.1-beta3'
+    implementation "com.google.mlkit:pose-detection-accurate:18.0.0-beta3"
     implementation "androidx.window:window:1.0.0-beta02"
     implementation("com.google.guava:guava:31.0.1-android")
     implementation 'com.google.code.gson:gson:2.8.6'

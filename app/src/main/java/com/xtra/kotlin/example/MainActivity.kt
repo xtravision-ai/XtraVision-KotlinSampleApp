@@ -8,6 +8,7 @@ import ai.xtravision.util.*
 import androidx.camera.view.PreviewView
 
 import android.util.Log
+import android.widget.TextView
 
 class MainActivity : AppCompatActivity(), XtraVisionAIListener {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -15,20 +16,29 @@ class MainActivity : AppCompatActivity(), XtraVisionAIListener {
         setContentView(R.layout.activity_main)
 
         // STEP-1:: Set Required Variable
-        val authToken = "_AUTH-TOKEN_"
-        val assessmentName = "BANDED_EXTERNAL_ROTATION"
+        val authToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJkOTU1NTVkNS0wNmFhLTExZWQtOGJkYy0xMmZhYjRmZmFiZWQiLCJhcHBJZCI6IjY5YTdmMmU2LTA2YWEtMTFlZC04YmRjLTEyZmFiNGZmYWJlZCIsIm9yZ0lkIjoiNmQ5MWZlN2YtMDZhOS0xMWVkLThiZGMtMTJmYWI0ZmZhYmVkIiwiaWF0IjoxNjYwMTA3MjI0LCJleHAiOjE2OTE2NjQ4MjR9._i4MJbwPznHzxoStcRAcK7N7k_xGdUjvKwmHXv1zixM"
+        val assessmentName = "BANDED_ALTERNATING_DIAGNOLS"
         val isPreJoin = false
         val previewView : PreviewView = findViewById<PreviewView>(R.id.xtraVisionPreviewView)
-        val selectedCamera = 1  //0: Front Camera, 1: Back Camera
+        val selectedCamera = 0  //0: Front Camera, 1: Back Camera
 
         // STEP-2:: create initial Objects: connectionData,requestData and libData
-        val connectionData = XtraVisionConnectionData(authToken, assessmentName)
+
+        val assessmentConfig = XtraVisionAssessmentConfig(
+            repsThreshold = 5,
+            graceTimeThreshold = 20)
+
+        val connectionData = XtraVisionConnectionData(
+            authToken, assessmentName,
+            assessmentConfig = assessmentConfig
+        )
         val reqData = XtraVisionRequestData(isPreJoin)
         val libData = XtraVisionLibData(
             this,
             previewView,
             this,
-            selectedCamera
+            selectedCamera,
+            enableSkeletonView = true
         )
 
         // Check and Ask for Camera permission
@@ -66,6 +76,22 @@ class MainActivity : AppCompatActivity(), XtraVisionAIListener {
 
     override fun onResponse(resp: String?) {
         Log.d("CustomAIListener", resp.toString())
+        handleResponse(resp)
+    }
+    private fun handleResponse(resp: String?) {
+        try{
+            val string = resp.toString()
+
+            // Just pathing to print logs on screen
+            this@MainActivity.runOnUiThread(java.lang.Runnable {
+                val textView: TextView = findViewById(R.id.xtra_server_response)
+                textView.text = string ;
+            })
+
+        }
+        catch (e: Exception){
+            e.printStackTrace()
+        }
     }
     /**
      * ==============================
