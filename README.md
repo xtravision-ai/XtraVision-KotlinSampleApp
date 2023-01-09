@@ -16,4 +16,5 @@
 
 4. Install and run this sample app on your physical device. (Due to some Google ML kit dependency, SDK can't work in the emulator. You need a physical device to run the sample app).
 
-Please connect to Xtra Team to get auth -token and detail documentation for how to integrate SDK in your APP.
+
+To get API credentials, detailed documentation for request/response, and how to integrate SDK into your app, please contact Xtra Team.
