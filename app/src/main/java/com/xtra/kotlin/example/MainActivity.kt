@@ -9,8 +9,13 @@ import androidx.camera.view.PreviewView
 
 import android.util.Log
 import android.widget.TextView
+import org.json.JSONObject
+import org.json.JSONTokener
 
 class MainActivity : AppCompatActivity(), XtraVisionAIListener {
+
+    private lateinit var xtraVisionAIManger: XtraVisionAIManager;
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -40,7 +45,7 @@ class MainActivity : AppCompatActivity(), XtraVisionAIListener {
             previewView,
             this,
             selectedCamera,
-            enableSkeletonView = true
+            enableSkeletonView = false
         )
 
         // Check and Ask for Camera permission
@@ -49,13 +54,28 @@ class MainActivity : AppCompatActivity(), XtraVisionAIListener {
         // STEP-3:: if permission is granted, then let's start an assessment
         if (XtraVisionPermissionHelper.cameraPermissionsGranted(this)) {
             // create an object and initiate the Assessment process
-            val xtraVisionAIManger = XtraVisionAIManager(
+            xtraVisionAIManger = XtraVisionAIManager(
                 connectionData, reqData, libData)
             xtraVisionAIManger!!.initiate()
         } else {
             XtraVisionPermissionHelper.checkAndRequestCameraPermissions(this)
         }
+    }
 
+    override fun onPause() {
+        super.onPause()
+        xtraVisionAIManger?.onPause()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        xtraVisionAIManger?.onDestroy()
+    }
+
+    // on back-press destroy current activity, to prevent conflict with previous assessment
+    override fun onBackPressed() {
+        super.onBackPressed()
+        finish()
     }
 
 
@@ -82,9 +102,33 @@ class MainActivity : AppCompatActivity(), XtraVisionAIListener {
     }
     private fun handleResponse(resp: String?) {
         try{
-            val string = resp.toString()
+//            val string = resp.toString()
+            val obj = JSONObject(resp)
+            var string = "--"
+            val errors = obj.optJSONArray("errors")
 
-            // Just pathing to print logs on screen
+            val jsonObject = JSONTokener(resp).nextValue() as JSONObject
+            val jsonErrorArray = jsonObject.getJSONArray("errors")
+
+            if (jsonErrorArray.length() != 0) {
+                // got some error
+                string = jsonErrorArray.getJSONObject(0).getJSONObject("extensions").getString("code")
+            } else {
+                // Data handling
+                val jsonDataObject = jsonObject.getJSONObject("data")
+                val additionalResponseObject = jsonDataObject.getJSONObject("additional_response")
+                val category = jsonDataObject.getString("category")
+
+                if (category.equals("POSE_BASED_REPS", true)) {
+                    val inPose = additionalResponseObject.getString("in_pose")
+                    val reps = additionalResponseObject.getJSONObject("reps")
+                    val totalReps = reps.getString("total")
+
+                    string = "Count: $totalReps  inPose: $inPose"
+                }
+            }
+
+            // Just patching to print logs on screen
             this@MainActivity.runOnUiThread(java.lang.Runnable {
                 val textView: TextView = findViewById(R.id.xtra_server_response)
                 textView.text = string ;
