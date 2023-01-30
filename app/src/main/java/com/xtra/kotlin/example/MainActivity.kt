@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity(), XtraVisionAIListener {
 
         // STEP-1:: Set Required Variable
         val authToken = "__AUTH_TOKEN__"
-        val assessmentName = "SQUATS"
+        val assessmentName = "HALF_SQUATS"
         val selectedCamera = 0  //0: Front Camera, 1: Back Camera
 
 
@@ -45,7 +45,7 @@ class MainActivity : AppCompatActivity(), XtraVisionAIListener {
             previewView,
             this,
             selectedCamera,
-            enableSkeletonView = false
+            enableSkeletonView = true
         )
 
         // Check and Ask for Camera permission
